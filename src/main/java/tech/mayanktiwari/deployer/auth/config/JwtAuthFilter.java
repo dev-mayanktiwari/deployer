@@ -16,7 +16,7 @@ import tech.mayanktiwari.deployer.auth.service.JwtService;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Objects;
-import java.util.UUID;
+import java.util.Optional;
 
 import static tech.mayanktiwari.deployer.common.config.Constants.AUTHORIZATION;
 import static tech.mayanktiwari.deployer.common.config.Constants.BEARER;
@@ -43,24 +43,20 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         String jwtToken = authHeader.substring(BEARER.length());
 
-        if (!jwtService.validateToken(jwtToken)) {
+        Optional<AuthPrincipal> principal = jwtService.extractPrincipal(jwtToken);
+
+        if (principal.isEmpty()) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        AuthPrincipal principal = new AuthPrincipal(
-                UUID.fromString(jwtService.extractUserId(jwtToken)),
-                jwtService.extractUsername(jwtToken)
-        );
-
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                principal,
+                principal.get(),
                 null,
                 Collections.emptyList()
         );
 
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         filterChain.doFilter(request, response);

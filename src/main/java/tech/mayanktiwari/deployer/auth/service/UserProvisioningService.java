@@ -1,8 +1,8 @@
 package tech.mayanktiwari.deployer.auth.service;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tech.mayanktiwari.deployer.auth.dto.OAuthUserInfo;
 import tech.mayanktiwari.deployer.auth.entity.UserAuthProvider;
 import tech.mayanktiwari.deployer.auth.repository.UserAuthProviderRepository;
@@ -25,11 +25,11 @@ public class UserProvisioningService {
                                 "User not found for auth provider entry: " + existingAuth.getUserId()
                         )))
                 .orElseGet(() -> {
-                    User user = new User();
-                    user.setUsername(userInfo.getUsername());
-                    user.setEmail(userInfo.getEmail());
-                    user.setAvatarUrl(userInfo.getAvatarUrl());
-                    User savedUser = userService.save(user);
+                    User savedUser = userService.createUser(
+                            userInfo.getUsername(),
+                            userInfo.getEmail(),
+                            userInfo.getAvatarUrl()
+                    );
 
                     UserAuthProvider authProvider = new UserAuthProvider();
                     authProvider.setUserId(savedUser.getId());
