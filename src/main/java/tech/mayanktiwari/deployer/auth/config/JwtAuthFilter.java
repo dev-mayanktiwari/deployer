@@ -10,8 +10,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import tech.mayanktiwari.deployer.auth.entity.User;
-import tech.mayanktiwari.deployer.auth.repository.UserRepository;
+import tech.mayanktiwari.deployer.auth.dto.AuthPrincipal;
 import tech.mayanktiwari.deployer.auth.service.JwtService;
 
 import java.io.IOException;
@@ -27,7 +26,6 @@ import static tech.mayanktiwari.deployer.common.config.Constants.BEARER;
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
-    private final UserRepository userRepository;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -50,17 +48,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             return;
         }
 
-        UUID userId = UUID.fromString(jwtService.extractUserId(jwtToken));
-
-        User user = userRepository.findById(userId).orElse(null);
-
-        if (Objects.isNull(user)) {
-            filterChain.doFilter(request, response);
-            return;
-        }
+        AuthPrincipal principal = new AuthPrincipal(
+                UUID.fromString(jwtService.extractUserId(jwtToken)),
+                jwtService.extractUsername(jwtToken)
+        );
 
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                user,
+                principal,
                 null,
                 Collections.emptyList()
         );

@@ -6,10 +6,10 @@ import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import tech.mayanktiwari.deployer.auth.entity.User;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
+import java.util.UUID;
 
 import static tech.mayanktiwari.deployer.common.config.Constants.USERNAME;
 
@@ -29,10 +29,10 @@ public class JwtService {
         );
     }
 
-    public String generateToken(User user) {
+    public String generateToken(UUID userId, String username) {
         return Jwts.builder()
-                .subject(user.getId().toString())
-                .claim(USERNAME, user.getUsername())
+                .subject(userId.toString())
+                .claim(USERNAME, username)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSigningKey())
@@ -46,6 +46,15 @@ public class JwtService {
                 .parseSignedClaims(token)
                 .getPayload()
                 .getSubject();
+    }
+
+    public String extractUsername(String token) {
+        return Jwts.parser()
+                .verifyWith(getSigningKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .get(USERNAME, String.class);
     }
 
     public boolean validateToken(String token) {
