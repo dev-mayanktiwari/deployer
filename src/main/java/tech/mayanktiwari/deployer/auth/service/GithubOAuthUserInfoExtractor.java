@@ -1,9 +1,11 @@
 package tech.mayanktiwari.deployer.auth.service;
 
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.stereotype.Component;
 import tech.mayanktiwari.deployer.auth.dto.OAuthUserInfo;
 import tech.mayanktiwari.deployer.common.config.AuthProvider;
 
+@Component
 public class GithubOAuthUserInfoExtractor implements OAuthUserInfoExtractor {
 
     public static final String USERNAME = "login";

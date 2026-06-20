@@ -15,5 +15,4 @@ public class OAuthUserInfo {
     String username;
     String email;
     String avatarUrl;
-    String accessToken;
 }

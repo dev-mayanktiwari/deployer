@@ -18,11 +18,7 @@ public class UserService {
         return userRepository.findById(id);
     }
 
-    public User createUser(String username, String email, String avatarUrl) {
-        User user = new User();
-        user.setUsername(username);
-        user.setEmail(email);
-        user.setAvatarUrl(avatarUrl);
+    public User save(User user) {
         return userRepository.save(user);
     }
 }
