@@ -1,6 +1,9 @@
 package tech.mayanktiwari.deployer.auth.oauth;
 
+import static tech.mayanktiwari.deployer.common.config.Constants.AUTH_COOKIE;
+
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -22,21 +25,22 @@ import tech.mayanktiwari.deployer.auth.service.AuthService;
 @RequiredArgsConstructor
 public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
-  private static final String REDIRECT_URL = "/auth/callback?token=";
   private final AuthService authService;
   private final OAuth2AuthorizedClientService authorizedClientService;
 
-  /**
-   * key = provider name <br>
-   * value = extractor bean
-   *
-   * <p>github -> GitHubOAuthExtractor <br>
-   * google -> GoogleOAuthExtractor
-   */
   private final Map<String, OAuthUserInfoExtractor> extractors;
 
   @Value("${app.frontend-url}")
   private String frontendUrl;
+
+  @Value("${app.jwt.expiration-ms}")
+  private long jwtExpirationMs;
+
+  @Value("${app.cookie.secure}")
+  private boolean cookieSecure;
+
+  @Value("${app.cookie.same-site}")
+  private String cookieSameSite;
 
   @Override
   public void onAuthenticationSuccess(
@@ -62,11 +66,25 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     }
 
     OAuthUserInfo userInfo = extractor.extractUserInfo(authenticatedUser);
-
     String jwtToken = authService.handleOAuth2Login(userInfo, accessToken);
 
-    String redirectUrl = frontendUrl + REDIRECT_URL + jwtToken;
+    Cookie cookie = new Cookie(AUTH_COOKIE, jwtToken);
+    cookie.setHttpOnly(true);
+    cookie.setSecure(cookieSecure);
+    cookie.setPath("/");
+    cookie.setMaxAge((int) (jwtExpirationMs / 1000));
+    // SameSite must be set via the header — the Cookie API doesn't support it directly
+    response.addCookie(cookie);
+    response.setHeader(
+        "Set-Cookie",
+        String.format(
+            "%s=%s; Path=/; Max-Age=%d; HttpOnly; SameSite=%s%s",
+            AUTH_COOKIE,
+            jwtToken,
+            (int) (jwtExpirationMs / 1000),
+            cookieSameSite,
+            cookieSecure ? "; Secure" : ""));
 
-    getRedirectStrategy().sendRedirect(request, response, redirectUrl);
+    getRedirectStrategy().sendRedirect(request, response, frontendUrl);
   }
 }
