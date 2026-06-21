@@ -17,11 +17,11 @@ import tech.mayanktiwari.deployer.common.response.ResponseBuilder;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final AuthService authService;
+  private final AuthService authService;
 
-    @GetMapping("/me")
-    public ResponseEntity<GenericApiResponse<AuthUserResponse>> me(Authentication authentication) {
-        AuthPrincipal principal = (AuthPrincipal) authentication.getPrincipal();
-        return ResponseBuilder.buildSuccessResponse(authService.getMe(principal));
-    }
+  @GetMapping("/me")
+  public ResponseEntity<GenericApiResponse<AuthUserResponse>> me(Authentication authentication) {
+    AuthPrincipal principal = (AuthPrincipal) authentication.getPrincipal();
+    return ResponseBuilder.buildSuccessResponse(authService.getMe(principal));
+  }
 }

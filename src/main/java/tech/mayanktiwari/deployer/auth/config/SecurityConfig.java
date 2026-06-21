@@ -17,27 +17,28 @@ import tech.mayanktiwari.deployer.common.handler.SecurityExceptionHandler;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtAuthFilter jwtAuthFilter;
-    private final OAuth2SuccessHandler oAuth2SuccessHandler;
-    private final SecurityExceptionHandler securityExceptionHandler;
+  private final JwtAuthFilter jwtAuthFilter;
+  private final OAuth2SuccessHandler oAuth2SuccessHandler;
+  private final SecurityExceptionHandler securityExceptionHandler;
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-        return httpSecurity
-                .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(
-                        auth ->
-                                auth.requestMatchers("/auth/**", "/api-docs/**", "/swagger-ui/**")
-                                        .permitAll()
-                                        .anyRequest()
-                                        .authenticated())
-                .sessionManagement(
-                        session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .oauth2Login(oauth2 -> oauth2.successHandler(oAuth2SuccessHandler))
-                .exceptionHandling(ex -> ex
-                        .authenticationEntryPoint(securityExceptionHandler)
-                        .accessDeniedHandler(securityExceptionHandler))
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-                .build();
-    }
+  @Bean
+  public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
+    return httpSecurity
+        .csrf(AbstractHttpConfigurer::disable)
+        .authorizeHttpRequests(
+            auth ->
+                auth.requestMatchers("/auth/**", "/api-docs/**", "/swagger-ui/**")
+                    .permitAll()
+                    .anyRequest()
+                    .authenticated())
+        .sessionManagement(
+            session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .oauth2Login(oauth2 -> oauth2.successHandler(oAuth2SuccessHandler))
+        .exceptionHandling(
+            ex ->
+                ex.authenticationEntryPoint(securityExceptionHandler)
+                    .accessDeniedHandler(securityExceptionHandler))
+        .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+        .build();
+  }
 }
