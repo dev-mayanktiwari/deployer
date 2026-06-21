@@ -7,5 +7,5 @@ public interface OAuthUserInfoExtractor {
 
   String getProvider();
 
-  OAuthUserInfo extractUserInfo(OAuth2User user);
+  OAuthUserInfo extractUserInfo(OAuth2User user, String accessToken);
 }

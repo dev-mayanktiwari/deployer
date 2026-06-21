@@ -65,7 +65,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
       throw new IllegalStateException("Extractor not found for provider: " + provider);
     }
 
-    OAuthUserInfo userInfo = extractor.extractUserInfo(authenticatedUser);
+    OAuthUserInfo userInfo = extractor.extractUserInfo(authenticatedUser, accessToken);
     String jwtToken = authService.handleOAuth2Login(userInfo, accessToken);
 
     Cookie cookie = new Cookie(AUTH_COOKIE, jwtToken);
