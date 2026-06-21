@@ -2,38 +2,47 @@ package tech.mayanktiwari.deployer.common.response;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import tech.mayanktiwari.deployer.common.exception.ErrorCode;
 
 public final class ResponseBuilder {
 
     private ResponseBuilder() {}
 
-    // 200 — data only
-    public static <T> ResponseEntity<ApiResponse<T>> ok(T data) {
-        return ResponseEntity.ok(ApiResponse.of(data));
+    // ── Success ────────────────────────────────────────────────────────────────
+
+    public static <T> ResponseEntity<GenericApiResponse<T>> buildSuccessResponse(T data) {
+        return ResponseEntity.ok(GenericApiResponse.success(data));
     }
 
-    // 200 — data + message
-    public static <T> ResponseEntity<ApiResponse<T>> ok(T data, String message) {
-        return ResponseEntity.ok(ApiResponse.of(data, message));
+    public static <T> ResponseEntity<GenericApiResponse<T>> buildSuccessResponse(String message, T data) {
+        return ResponseEntity.ok(GenericApiResponse.success(message, data));
     }
 
-    // 200 — message only, no data (e.g. logout, soft-delete confirmations)
-    public static ResponseEntity<ApiResponse<Void>> ok(String message) {
-        return ResponseEntity.ok(ApiResponse.message(message));
+    public static <T> ResponseEntity<GenericApiResponse<T>> buildSuccessResponse(String message, T data, HttpStatus status) {
+        return ResponseEntity.status(status).body(GenericApiResponse.success(message, data));
     }
 
-    // 201 — data only
-    public static <T> ResponseEntity<ApiResponse<T>> created(T data) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.of(data));
+    public static ResponseEntity<GenericApiResponse<Void>> buildSuccessResponse(String message) {
+        return ResponseEntity.ok(GenericApiResponse.success(message));
     }
 
-    // 201 — data + message
-    public static <T> ResponseEntity<ApiResponse<T>> created(T data, String message) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.of(data, message));
+    // ── Failure ────────────────────────────────────────────────────────────────
+    // Prefer throwing AppException subclasses for most errors — the GlobalExceptionHandler
+    // will build the response. Use these only for expected business rejections where you need
+    // direct control over the response without an exception crossing the call stack.
+
+    public static <T> ResponseEntity<GenericApiResponse<T>> buildFailureResponse(ErrorCode errorCode) {
+        return ResponseEntity.status(errorCode.getHttpStatus())
+                .body(GenericApiResponse.failure(errorCode, null));
     }
 
-    // 204 — no content (hard deletes, fire-and-forget)
-    public static ResponseEntity<Void> noContent() {
-        return ResponseEntity.noContent().build();
+    public static <T> ResponseEntity<GenericApiResponse<T>> buildFailureResponse(String message, ErrorCode errorCode) {
+        return ResponseEntity.status(errorCode.getHttpStatus())
+                .body(GenericApiResponse.failure(message, errorCode, null));
+    }
+
+    public static <T> ResponseEntity<GenericApiResponse<T>> buildFailureResponse(String message, ErrorCode errorCode, HttpStatus status) {
+        return ResponseEntity.status(status)
+                .body(GenericApiResponse.failure(message, errorCode, null));
     }
 }

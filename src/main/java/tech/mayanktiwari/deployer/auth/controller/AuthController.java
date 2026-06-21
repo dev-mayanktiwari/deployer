@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import tech.mayanktiwari.deployer.auth.dto.AuthPrincipal;
 import tech.mayanktiwari.deployer.auth.dto.AuthUserResponse;
 import tech.mayanktiwari.deployer.auth.service.AuthService;
-import tech.mayanktiwari.deployer.common.response.ApiResponse;
+import tech.mayanktiwari.deployer.common.response.GenericApiResponse;
 import tech.mayanktiwari.deployer.common.response.ResponseBuilder;
 
 @RestController
@@ -20,8 +20,8 @@ public class AuthController {
     private final AuthService authService;
 
     @GetMapping("/me")
-    public ResponseEntity<ApiResponse<AuthUserResponse>> me(Authentication authentication) {
+    public ResponseEntity<GenericApiResponse<AuthUserResponse>> me(Authentication authentication) {
         AuthPrincipal principal = (AuthPrincipal) authentication.getPrincipal();
-        return ResponseBuilder.ok(authService.getMe(principal));
+        return ResponseBuilder.buildSuccessResponse(authService.getMe(principal));
     }
 }
