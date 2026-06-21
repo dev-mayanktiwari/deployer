@@ -1,9 +1,12 @@
 package tech.mayanktiwari.deployer.auth.oauth;
 
+import static tech.mayanktiwari.deployer.common.config.Constants.BEARER;
+
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
@@ -12,12 +15,12 @@ import org.springframework.web.client.RestClient;
 @Slf4j
 public class GitHubApiClient {
 
-  private record GitHubEmail(String email, boolean primary, boolean verified) {}
+  private static final String USER_EMAILS_PATH = "/user/emails";
 
   private final RestClient restClient;
 
-  public GitHubApiClient(@Value("${app.github.api-base-url}") String baseUrl) {
-    this.restClient = RestClient.builder().baseUrl(baseUrl).build();
+  public GitHubApiClient(@Qualifier("gitHubRestClient") RestClient restClient) {
+    this.restClient = restClient;
   }
 
   public Optional<String> fetchPrimaryEmail(String accessToken) {
@@ -25,12 +28,12 @@ public class GitHubApiClient {
       GitHubEmail[] emails =
           restClient
               .get()
-              .uri("/user/emails")
-              .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
+              .uri(USER_EMAILS_PATH)
+              .header(HttpHeaders.AUTHORIZATION, BEARER + accessToken)
               .retrieve()
               .body(GitHubEmail[].class);
 
-      if (emails == null) return Optional.empty();
+      if (Objects.isNull(emails)) return Optional.empty();
 
       return Arrays.stream(emails)
           .filter(e -> e.primary() && e.verified())
@@ -41,4 +44,6 @@ public class GitHubApiClient {
       return Optional.empty();
     }
   }
+
+  private record GitHubEmail(String email, boolean primary, boolean verified) {}
 }
