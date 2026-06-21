@@ -3,14 +3,16 @@ package tech.mayanktiwari.deployer.auth.oauth;
 import static tech.mayanktiwari.deployer.common.config.Constants.AUTH_COOKIE;
 
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Map;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
@@ -27,7 +29,6 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
   private final AuthService authService;
   private final OAuth2AuthorizedClientService authorizedClientService;
-
   private final Map<String, OAuthUserInfoExtractor> extractors;
 
   @Value("${app.frontend-url}")
@@ -48,7 +49,6 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
       throws IOException, ServletException {
     OAuth2AuthenticationToken authToken = (OAuth2AuthenticationToken) authentication;
     String provider = authToken.getAuthorizedClientRegistrationId();
-
     OAuth2User authenticatedUser = authToken.getPrincipal();
 
     OAuth2AuthorizedClient authorizedClient =
@@ -68,23 +68,16 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     OAuthUserInfo userInfo = extractor.extractUserInfo(authenticatedUser, accessToken);
     String jwtToken = authService.handleOAuth2Login(userInfo, accessToken);
 
-    Cookie cookie = new Cookie(AUTH_COOKIE, jwtToken);
-    cookie.setHttpOnly(true);
-    cookie.setSecure(cookieSecure);
-    cookie.setPath("/");
-    cookie.setMaxAge((int) (jwtExpirationMs / 1000));
-    // SameSite must be set via the header — the Cookie API doesn't support it directly
-    response.addCookie(cookie);
-    response.setHeader(
-        "Set-Cookie",
-        String.format(
-            "%s=%s; Path=/; Max-Age=%d; HttpOnly; SameSite=%s%s",
-            AUTH_COOKIE,
-            jwtToken,
-            (int) (jwtExpirationMs / 1000),
-            cookieSameSite,
-            cookieSecure ? "; Secure" : ""));
+    ResponseCookie cookie =
+        ResponseCookie.from(AUTH_COOKIE, jwtToken)
+            .httpOnly(true)
+            .secure(cookieSecure)
+            .path("/")
+            .maxAge(Duration.ofMillis(jwtExpirationMs))
+            .sameSite(cookieSameSite)
+            .build();
 
+    response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     getRedirectStrategy().sendRedirect(request, response, frontendUrl);
   }
 }
