@@ -13,34 +13,38 @@ import tech.mayanktiwari.deployer.users.service.UserService;
 @RequiredArgsConstructor
 public class UserProvisioningService {
 
-    private final UserAuthProviderRepository userAuthProviderRepository;
-    private final UserService userService;
+  private final UserAuthProviderRepository userAuthProviderRepository;
+  private final UserService userService;
 
-    @Transactional
-    public User findOrCreateUser(OAuthUserInfo userInfo, String accessToken) {
-        return userAuthProviderRepository
-                .findByProviderIdAndProvider(userInfo.getProviderId(), userInfo.getProvider())
-                .map(existingAuth -> userService.findById(existingAuth.getUserId())
-                        .orElseThrow(() -> new IllegalStateException(
-                                "User not found for auth provider entry: " + existingAuth.getUserId()
-                        )))
-                .orElseGet(() -> {
-                    User savedUser = userService.createUser(
-                            userInfo.getUsername(),
-                            userInfo.getEmail(),
-                            userInfo.getAvatarUrl()
-                    );
+  @Transactional
+  public User findOrCreateUser(OAuthUserInfo userInfo, String accessToken) {
+    return userAuthProviderRepository
+        .findByProviderIdAndProvider(userInfo.getProviderId(), userInfo.getProvider())
+        .map(
+            existingAuth ->
+                userService
+                    .findById(existingAuth.getUser().getId())
+                    .orElseThrow(
+                        () ->
+                            new IllegalStateException(
+                                "User not found for auth provider entry: "
+                                    + existingAuth.getUser().getId())))
+        .orElseGet(
+            () -> {
+              User savedUser =
+                  userService.createUser(
+                      userInfo.getUsername(), userInfo.getEmail(), userInfo.getAvatarUrl());
 
-                    UserAuthProvider authProvider = new UserAuthProvider();
-                    authProvider.setUserId(savedUser.getId());
-                    authProvider.setProvider(userInfo.getProvider());
-                    authProvider.setProviderId(userInfo.getProviderId());
-                    authProvider.setAccessToken(accessToken);
-                    authProvider.setProviderUsername(userInfo.getUsername());
-                    authProvider.setProviderAvatar(userInfo.getAvatarUrl());
-                    userAuthProviderRepository.save(authProvider);
+              UserAuthProvider authProvider = new UserAuthProvider();
+              authProvider.setUser(savedUser);
+              authProvider.setProvider(userInfo.getProvider());
+              authProvider.setProviderId(userInfo.getProviderId());
+              authProvider.setAccessToken(accessToken);
+              authProvider.setProviderUsername(userInfo.getUsername());
+              authProvider.setProviderAvatar(userInfo.getAvatarUrl());
+              userAuthProviderRepository.save(authProvider);
 
-                    return savedUser;
-                });
-    }
+              return savedUser;
+            });
+  }
 }

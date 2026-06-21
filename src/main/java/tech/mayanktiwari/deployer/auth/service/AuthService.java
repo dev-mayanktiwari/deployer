@@ -11,11 +11,11 @@ import tech.mayanktiwari.deployer.users.entity.User;
 @RequiredArgsConstructor
 public class AuthService {
 
-    private final UserProvisioningService userProvisioningService;
-    private final JwtService jwtService;
+  private final UserProvisioningService userProvisioningService;
+  private final JwtService jwtService;
 
-    public String handleOAuth2Login(OAuthUserInfo userInfo, String accessToken) {
-        User user = userProvisioningService.findOrCreateUser(userInfo, accessToken);
-        return jwtService.generateToken(user.getId(), user.getUsername());
-    }
+  public String handleOAuth2Login(OAuthUserInfo userInfo, String accessToken) {
+    User user = userProvisioningService.findOrCreateUser(userInfo, accessToken);
+    return jwtService.generateToken(user.getId(), user.getUsername());
+  }
 }
