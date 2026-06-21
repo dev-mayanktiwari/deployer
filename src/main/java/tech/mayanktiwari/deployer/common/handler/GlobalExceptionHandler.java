@@ -15,40 +15,38 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 import tech.mayanktiwari.deployer.common.exception.AppException;
 import tech.mayanktiwari.deployer.common.exception.ErrorCode;
+import tech.mayanktiwari.deployer.common.response.ApiError;
 import tech.mayanktiwari.deployer.common.response.FieldValidationError;
-import tech.mayanktiwari.deployer.common.response.GenericApiResponse;
 
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
 
   @ExceptionHandler(AppException.class)
-  public ResponseEntity<GenericApiResponse<Void>> handleAppException(
-      AppException ex, HttpServletRequest request) {
+  public ResponseEntity<ApiError> handleAppException(AppException ex, HttpServletRequest request) {
     ErrorCode code = ex.getErrorCode();
     return ResponseEntity.status(code.getHttpStatus())
-        .body(GenericApiResponse.failure(ex.getMessage(), code, request.getRequestURI()));
+        .body(ApiError.of(code, ex.getMessage(), request.getRequestURI()));
   }
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
-  public ResponseEntity<GenericApiResponse<Void>> handleValidation(
+  public ResponseEntity<ApiError> handleValidation(
       MethodArgumentNotValidException ex, HttpServletRequest request) {
     List<FieldValidationError> details =
         ex.getBindingResult().getFieldErrors().stream()
             .map(fe -> new FieldValidationError(fe.getField(), fe.getDefaultMessage()))
             .toList();
-
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
         .body(
-            GenericApiResponse.failure(
-                ErrorCode.VALIDATION_FAILED.getDefaultMessage(),
+            ApiError.of(
                 ErrorCode.VALIDATION_FAILED,
+                ErrorCode.VALIDATION_FAILED.getDefaultMessage(),
                 request.getRequestURI(),
                 details));
   }
 
   @ExceptionHandler(ConstraintViolationException.class)
-  public ResponseEntity<GenericApiResponse<Void>> handleConstraintViolation(
+  public ResponseEntity<ApiError> handleConstraintViolation(
       ConstraintViolationException ex, HttpServletRequest request) {
     List<FieldValidationError> details =
         ex.getConstraintViolations().stream()
@@ -60,61 +58,58 @@ public class GlobalExceptionHandler {
                       cv.getMessage());
                 })
             .toList();
-
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
         .body(
-            GenericApiResponse.failure(
-                ErrorCode.VALIDATION_FAILED.getDefaultMessage(),
+            ApiError.of(
                 ErrorCode.VALIDATION_FAILED,
+                ErrorCode.VALIDATION_FAILED.getDefaultMessage(),
                 request.getRequestURI(),
                 details));
   }
 
   @ExceptionHandler(HttpMessageNotReadableException.class)
-  public ResponseEntity<GenericApiResponse<Void>> handleUnreadableBody(HttpServletRequest request) {
+  public ResponseEntity<ApiError> handleUnreadableBody(HttpServletRequest request) {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
         .body(
-            GenericApiResponse.failure(
-                "Request body is missing or malformed",
+            ApiError.of(
                 ErrorCode.BAD_REQUEST,
+                "Request body is missing or malformed",
                 request.getRequestURI()));
   }
 
   @ExceptionHandler(MissingServletRequestParameterException.class)
-  public ResponseEntity<GenericApiResponse<Void>> handleMissingParam(
+  public ResponseEntity<ApiError> handleMissingParam(
       MissingServletRequestParameterException ex, HttpServletRequest request) {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
         .body(
-            GenericApiResponse.failure(
-                "Required parameter '" + ex.getParameterName() + "' is missing",
+            ApiError.of(
                 ErrorCode.BAD_REQUEST,
+                "Required parameter '" + ex.getParameterName() + "' is missing",
                 request.getRequestURI()));
   }
 
   @ExceptionHandler(NoResourceFoundException.class)
-  public ResponseEntity<GenericApiResponse<Void>> handleNotFound(HttpServletRequest request) {
+  public ResponseEntity<ApiError> handleNotFound(HttpServletRequest request) {
     return ResponseEntity.status(HttpStatus.NOT_FOUND)
         .body(
-            GenericApiResponse.failure(
-                "No endpoint found at " + request.getRequestURI(),
+            ApiError.of(
                 ErrorCode.RESOURCE_NOT_FOUND,
+                "No endpoint found at " + request.getRequestURI(),
                 request.getRequestURI()));
   }
 
   @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-  public ResponseEntity<GenericApiResponse<Void>> handleMethodNotSupported(
+  public ResponseEntity<ApiError> handleMethodNotSupported(
       HttpRequestMethodNotSupportedException ex, HttpServletRequest request) {
     return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
         .body(
-            GenericApiResponse.failure(
-                ex.getMessage(), ErrorCode.METHOD_NOT_SUPPORTED, request.getRequestURI()));
+            ApiError.of(ErrorCode.METHOD_NOT_SUPPORTED, ex.getMessage(), request.getRequestURI()));
   }
 
   @ExceptionHandler(Exception.class)
-  public ResponseEntity<GenericApiResponse<Void>> handleUnexpected(
-      Exception ex, HttpServletRequest request) {
+  public ResponseEntity<ApiError> handleUnexpected(Exception ex, HttpServletRequest request) {
     log.error("Unhandled exception at {}: {}", request.getRequestURI(), ex.getMessage(), ex);
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .body(GenericApiResponse.failure(ErrorCode.INTERNAL_ERROR, request.getRequestURI()));
+        .body(ApiError.of(ErrorCode.INTERNAL_ERROR, request.getRequestURI()));
   }
 }

@@ -13,7 +13,7 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.stereotype.Component;
 import tech.mayanktiwari.deployer.common.exception.ErrorCode;
-import tech.mayanktiwari.deployer.common.response.GenericApiResponse;
+import tech.mayanktiwari.deployer.common.response.ApiError;
 
 @Component
 @RequiredArgsConstructor
@@ -40,6 +40,6 @@ public class SecurityExceptionHandler implements AuthenticationEntryPoint, Acces
       throws IOException {
     response.setStatus(status.value());
     response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-    objectMapper.writeValue(response.getWriter(), GenericApiResponse.failure(errorCode, path));
+    objectMapper.writeValue(response.getWriter(), ApiError.of(errorCode, path));
   }
 }
