@@ -10,6 +10,7 @@ import tech.mayanktiwari.deployer.auth.dto.AuthPrincipal;
 import tech.mayanktiwari.deployer.auth.dto.AuthUserResponse;
 import tech.mayanktiwari.deployer.auth.service.AuthService;
 import tech.mayanktiwari.deployer.common.response.ApiResponse;
+import tech.mayanktiwari.deployer.common.response.ResponseBuilder;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -21,6 +22,6 @@ public class AuthController {
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<AuthUserResponse>> me(Authentication authentication) {
         AuthPrincipal principal = (AuthPrincipal) authentication.getPrincipal();
-        return ResponseEntity.ok(ApiResponse.of(authService.getMe(principal)));
+        return ResponseBuilder.ok(authService.getMe(principal));
     }
 }
