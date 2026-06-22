@@ -13,6 +13,9 @@ import tech.mayanktiwari.deployer.auth.oauth.OAuthUserInfoExtractor;
 @Configuration
 public class OAuthConfig {
 
+  @Value("${app.github.api-base-url}")
+  String baseUrl;
+
   @Bean
   public Map<String, OAuthUserInfoExtractor> extractors(
       List<OAuthUserInfoExtractor> extractorList) {
@@ -21,8 +24,7 @@ public class OAuthConfig {
   }
 
   @Bean
-  public RestClient gitHubRestClient(
-      RestClient.Builder builder, @Value("${app.github.api-base-url}") String baseUrl) {
+  public RestClient gitHubRestClient(RestClient.Builder builder) {
     return builder.baseUrl(baseUrl).build();
   }
 }

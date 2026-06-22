@@ -1,5 +1,6 @@
 package tech.mayanktiwari.deployer.auth.oauth;
 
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Component;
@@ -26,9 +27,7 @@ public class GithubOAuthUserInfoExtractor implements OAuthUserInfoExtractor {
   public OAuthUserInfo extractUserInfo(OAuth2User user, String accessToken) {
     String email = user.getAttribute(EMAIL);
 
-    // GitHub returns null for email when the user has set it to private.
-    // Fall back to the /user/emails endpoint which returns all emails including private ones.
-    if (email == null) {
+    if (Objects.isNull(email)) {
       email = gitHubApiClient.fetchPrimaryEmail(accessToken).orElse(null);
     }
 

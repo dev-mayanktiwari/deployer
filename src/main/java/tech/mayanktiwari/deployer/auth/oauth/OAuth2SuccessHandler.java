@@ -27,6 +27,7 @@ import tech.mayanktiwari.deployer.auth.service.AuthService;
 @RequiredArgsConstructor
 public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
+  private static final String PATH = "/";
   private final AuthService authService;
   private final OAuth2AuthorizedClientService authorizedClientService;
   private final Map<String, OAuthUserInfoExtractor> extractors;
@@ -72,7 +73,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         ResponseCookie.from(AUTH_COOKIE, jwtToken)
             .httpOnly(true)
             .secure(cookieSecure)
-            .path("/")
+            .path(PATH)
             .maxAge(Duration.ofMillis(jwtExpirationMs))
             .sameSite(cookieSameSite)
             .build();
