@@ -59,6 +59,10 @@ app:
   github:
     api-base-url: https://api.github.com
 
+logging:
+  level:
+    tech.mayanktiwari.deployer.common.logging: DEBUG
+
 springdoc:
   api-docs:
     path: /api-docs
