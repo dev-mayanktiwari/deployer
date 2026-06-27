@@ -1,22 +1,22 @@
 package tech.mayanktiwari.deployer.project.dto;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
-import java.time.Instant;
-import java.util.UUID;
-
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CreateProjectResponseDTO {
+@AllArgsConstructor
+public class ProjectResponseDTO {
 
-    UUID id;
-    String name;
-    String repositoryUrl;
-    String branch;
-    String buildCommand;
-    String outputPath;
-    Instant createdAt;
-    
+  UUID id;
+  String name;
+  String repositoryUrl;
+  String branch;
+  String buildCommand;
+  String outputPath;
+  LocalDateTime createdAt;
 }
