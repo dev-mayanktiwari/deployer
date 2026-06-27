@@ -40,6 +40,7 @@ public class SecurityExceptionHandler implements AuthenticationEntryPoint, Acces
       throws IOException {
     response.setStatus(status.value());
     response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-    objectMapper.writeValue(response.getWriter(), ApiError.of(errorCode, path));
+    objectMapper.writeValue(
+        response.getWriter(), ApiError.of(errorCode, errorCode.getDefaultMessage(), path));
   }
 }

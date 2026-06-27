@@ -7,23 +7,21 @@ import tech.mayanktiwari.deployer.common.exception.ErrorCode;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record ApiError(
-    String code,
+    int code,
+    String error,
     String message,
     String path,
     String timestamp,
     List<FieldValidationError> details) {
 
-  public static ApiError of(ErrorCode errorCode, String path) {
-    return new ApiError(
-        errorCode.name(), errorCode.getDefaultMessage(), path, Instant.now().toString(), null);
-  }
-
   public static ApiError of(ErrorCode errorCode, String message, String path) {
-    return new ApiError(errorCode.name(), message, path, Instant.now().toString(), null);
+    return new ApiError(
+        errorCode.getCode(), errorCode.name(), message, path, Instant.now().toString(), null);
   }
 
   public static ApiError of(
       ErrorCode errorCode, String message, String path, List<FieldValidationError> details) {
-    return new ApiError(errorCode.name(), message, path, Instant.now().toString(), details);
+    return new ApiError(
+        errorCode.getCode(), errorCode.name(), message, path, Instant.now().toString(), details);
   }
 }

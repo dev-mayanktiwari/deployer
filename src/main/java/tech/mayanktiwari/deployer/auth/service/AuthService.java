@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import tech.mayanktiwari.deployer.auth.dto.AuthPrincipal;
 import tech.mayanktiwari.deployer.auth.dto.AuthUserResponse;
 import tech.mayanktiwari.deployer.auth.dto.OAuthUserInfo;
-import tech.mayanktiwari.deployer.common.exception.ResourceNotFoundException;
+import tech.mayanktiwari.deployer.common.exception.ErrorCode;
 import tech.mayanktiwari.deployer.users.entity.User;
 import tech.mayanktiwari.deployer.users.service.UserService;
 
@@ -28,7 +28,7 @@ public class AuthService {
     User user =
         userService
             .findById(principal.userId())
-            .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+            .orElseThrow(() -> ErrorCode.RESOURCE_NOT_FOUND.build("User", principal.userId()));
     return new AuthUserResponse(user.getId(), user.getUsername(), user.getEmail());
   }
 }

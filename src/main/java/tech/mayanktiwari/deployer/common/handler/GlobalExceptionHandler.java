@@ -110,6 +110,10 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ApiError> handleUnexpected(Exception ex, HttpServletRequest request) {
     log.error("Unhandled exception at {}: {}", request.getRequestURI(), ex.getMessage(), ex);
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .body(ApiError.of(ErrorCode.INTERNAL_ERROR, request.getRequestURI()));
+        .body(
+            ApiError.of(
+                ErrorCode.INTERNAL_ERROR,
+                ErrorCode.INTERNAL_ERROR.getDefaultMessage(),
+                request.getRequestURI()));
   }
 }
