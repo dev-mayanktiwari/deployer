@@ -59,6 +59,9 @@ app:
   github:
     api-base-url: https://api.github.com
 
+encryption:
+  secret: ${ENCRYPTION_SECRET}
+
 logging:
   level:
     tech.mayanktiwari.deployer.common.logging: DEBUG

@@ -52,7 +52,13 @@ public enum ErrorCode {
   INTERNAL_ERROR(
       5001,
       "An unexpected error occurred. Please try again later.",
-      HttpStatus.INTERNAL_SERVER_ERROR);
+      HttpStatus.INTERNAL_SERVER_ERROR),
+
+  // Encryption
+  INVALID_ENCRYPTION_CONFIGURATION(
+      6001, "Invalid encryption configuration", HttpStatus.INTERNAL_SERVER_ERROR),
+  ENCRYPTION_FAILED(6002, "Failed to encrypt value", HttpStatus.INTERNAL_SERVER_ERROR),
+  DECRYPTION_FAILED(6003, "Failed to decrypt value", HttpStatus.INTERNAL_SERVER_ERROR);
 
   private final int code;
   private final String defaultMessage;
