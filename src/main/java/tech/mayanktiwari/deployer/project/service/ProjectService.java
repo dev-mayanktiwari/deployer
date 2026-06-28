@@ -4,11 +4,12 @@ import static tech.mayanktiwari.deployer.common.config.Constants.PROJECT;
 import static tech.mayanktiwari.deployer.common.config.Constants.USER;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import tech.mayanktiwari.deployer.common.exception.ErrorCode;
-import tech.mayanktiwari.deployer.project.dto.CreateProjectDTO;
+import tech.mayanktiwari.deployer.project.dto.ProjectRequestDTO;
 import tech.mayanktiwari.deployer.project.dto.ProjectResponseDTO;
 import tech.mayanktiwari.deployer.project.entity.Project;
 import tech.mayanktiwari.deployer.project.mapper.ProjectMapper;
@@ -24,16 +25,20 @@ public class ProjectService {
   private final UserService userService;
   private final ProjectMapper projectMapper;
 
-  public ProjectResponseDTO createProject(CreateProjectDTO createProjectDTO, UUID userId) {
-    if (projectRepository.existsByNameAndUserId(createProjectDTO.getName(), userId)) {
-      throw ErrorCode.RESOURCE_ALREADY_EXISTS.build(PROJECT, createProjectDTO.getName());
+  public Optional<Project> findById(UUID id) {
+    return projectRepository.findById(id);
+  }
+
+  public ProjectResponseDTO createProject(ProjectRequestDTO projectRequestDTO, UUID userId) {
+    if (projectRepository.existsByNameAndUserId(projectRequestDTO.getName(), userId)) {
+      throw ErrorCode.RESOURCE_ALREADY_EXISTS.build(PROJECT, projectRequestDTO.getName());
     }
 
     User user =
         userService
             .findById(userId)
             .orElseThrow(() -> ErrorCode.RESOURCE_NOT_FOUND.build(USER, userId));
-    Project project = projectMapper.toEntity(createProjectDTO, user);
+    Project project = projectMapper.toEntity(projectRequestDTO, user);
 
     Project savedProject = projectRepository.save(project);
 

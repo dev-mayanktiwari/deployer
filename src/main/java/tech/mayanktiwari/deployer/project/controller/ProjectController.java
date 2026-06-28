@@ -7,6 +7,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,12 +23,9 @@ import org.springframework.web.bind.annotation.RestController;
 import tech.mayanktiwari.deployer.auth.dto.AuthPrincipal;
 import tech.mayanktiwari.deployer.common.openapi.CommonApiResponses;
 import tech.mayanktiwari.deployer.common.response.ApiError;
-import tech.mayanktiwari.deployer.project.dto.CreateProjectDTO;
+import tech.mayanktiwari.deployer.project.dto.ProjectRequestDTO;
 import tech.mayanktiwari.deployer.project.dto.ProjectResponseDTO;
 import tech.mayanktiwari.deployer.project.service.ProjectService;
-
-import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/projects")
@@ -52,7 +51,7 @@ public class ProjectController {
       description = "Project with this name already exists",
       content = @Content(schema = @Schema(implementation = ApiError.class)))
   public ResponseEntity<ProjectResponseDTO> createProject(
-      @RequestBody @Valid CreateProjectDTO request,
+      @RequestBody @Valid ProjectRequestDTO request,
       @AuthenticationPrincipal AuthPrincipal authPrincipal) {
     return ResponseEntity.status(HttpStatus.CREATED)
         .body(projectService.createProject(request, authPrincipal.userId()));

@@ -2,24 +2,24 @@ package tech.mayanktiwari.deployer.project.dto;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import java.time.LocalDateTime;
-import java.util.UUID;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.validator.constraints.URL;
 
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-@AllArgsConstructor
-public class ProjectResponseDTO {
+public class ProjectRequestDTO {
 
-  UUID id;
-  String name;
-  String repositoryUrl;
-  String branch;
-  String buildCommand;
-  String outputPath;
-  LocalDateTime createdAt;
+  @NotBlank String name;
+
+  @NotBlank @URL String repositoryUrl;
+
+  @NotBlank String branch;
+
+  @NotBlank String buildCommand;
+
+  @NotBlank String outputPath;
 }
